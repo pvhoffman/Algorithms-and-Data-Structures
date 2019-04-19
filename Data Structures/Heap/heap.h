@@ -1,7 +1,6 @@
 #ifndef __HEAP_HEAP_H__
 #define __HEAP_HEAP_H__
 
-#include <iostream>
 #include <vector>
 #include <stdexcept>
 
@@ -22,7 +21,22 @@ class heap_compare_min
         }
 };
 /*---------------------------------------------------------------------------*/
-template <typename T, template <class> class compare_policy>
+template <typename T>
+class heap_compare_max
+{
+    public:
+        using value_type = T;
+        enum compare_result {lt = -1, eq = 0, gt = 1};
+        compare_result compare(const value_type& lhs, const value_type& rhs)
+        {
+            if(lhs < rhs) return gt;
+            if(lhs > rhs) return lt;
+            return eq;
+        }
+};
+
+/*---------------------------------------------------------------------------*/
+template <typename T, template <class> class compare_policy = heap_compare_min>
 class heap : public compare_policy<T>
 {
     public:
@@ -38,6 +52,7 @@ class heap : public compare_policy<T>
                 }
 
         };
+
 
         void insert(value_type item)
         {
@@ -117,3 +132,4 @@ class heap : public compare_policy<T>
 } // namespace
 
 #endif /*!__HEAP_HEAP_H__*/
+
