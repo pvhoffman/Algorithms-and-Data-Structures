@@ -22,7 +22,7 @@ The public members available to consuming clients are:
 *  top - Returns the minimum or maximum value, depending upon the second template parameter, and throws an exception of type pvh::heap\_empty\_exception if the heap contains no elements.  After return from this method the size of the heap is decreased by one. Executes in O(n log n) time to maintain partial ordering.
 *  size - Returns the number of elements in the heap. Executes in O(1) time.
 
-### Some Uses
+### Uses
 The general use case for the heap data structure is in the form of a priority queue.
 1.  Thread scheduling.
 2.  Shortest path finding algorithms for graphs with weighted edges (Dijkstra).
