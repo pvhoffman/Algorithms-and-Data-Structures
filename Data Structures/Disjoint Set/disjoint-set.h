@@ -19,7 +19,7 @@ class disjoint_set
             size_type size;
         };
 
-        disjoint_set(size_type count) : _set_nodes(count)
+        disjoint_set(size_type count) : _set_nodes(count + 1)
         {
             for(size_type i = 1; i <= count; i++)
             {
@@ -37,6 +37,19 @@ class disjoint_set
             {
                 return find(_set_nodes[x].parent);
             }
+        }
+
+        size_type largest_set() const
+        {
+            size_type r = 0;
+            for(const auto& node : _set_nodes)
+            {
+                if(node.size > r)
+                {
+                    r = node.size;
+                }
+            }
+            return r;
         }
 
         void union_sets(size_type x, size_type y)
