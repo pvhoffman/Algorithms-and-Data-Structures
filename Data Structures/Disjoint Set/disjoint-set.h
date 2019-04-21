@@ -19,7 +19,7 @@ class disjoint_set
             size_type size;
         };
 
-        disjoint_set(size_type count) : _set_nodes(count + 1)
+        disjoint_set(size_type count) : _set_nodes(count + 1), _largest_set(1), _distinct_sets(count)
         {
             for(size_type i = 1; i <= count; i++)
             {
@@ -27,7 +27,8 @@ class disjoint_set
                 _set_nodes[i].size = 1;
             }
         }
-        size_type find(size_type x) const
+
+        size_type find(size_type x) 
         {
             if(_set_nodes[x].parent == x)
             {
@@ -35,21 +36,15 @@ class disjoint_set
             }
             else
             {
-                return find(_set_nodes[x].parent);
+                size_type p = find(_set_nodes[x].parent);
+                _set_nodes[x].parent = p;
+                return p;
             }
         }
 
         size_type largest_set() const
         {
-            size_type r = 0;
-            for(const auto& node : _set_nodes)
-            {
-                if(node.size > r)
-                {
-                    r = node.size;
-                }
-            }
-            return r;
+           return _largest_set;
         }
 
         void union_sets(size_type x, size_type y)
@@ -59,26 +54,40 @@ class disjoint_set
 
             if(l != r)
             {
+                size_type s = 0;
                 if(_set_nodes[l].size >= _set_nodes[r].size)
                 {
-                    _set_nodes[l].size = _set_nodes[l].size + _set_nodes[r].size;
+                    _set_nodes[l].size = s = _set_nodes[l].size + _set_nodes[r].size;
                     _set_nodes[r].parent = l;
                 }
                 else
                 {
-                    _set_nodes[r].size = _set_nodes[r].size + _set_nodes[l].size;
+                    _set_nodes[r].size = s = _set_nodes[r].size + _set_nodes[l].size;
                     _set_nodes[l].parent = r;
                 }
+                if(s > _largest_set)
+                {
+                    _largest_set = s;
+                }
+                --_distinct_sets;
             }
         }
 
-        bool same_set(size_type x, size_type y) const
+        bool same_set(size_type x, size_type y) 
         {
             return (find(x) == find(y));
         }
 
+        size_type distinct_sets()
+        {
+            return _distinct_sets;
+        }
+
     private:
         std::vector<set_node> _set_nodes;
+        size_type _largest_set;
+        size_type _distinct_sets;
+        
 
 
 };
