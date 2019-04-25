@@ -4,9 +4,15 @@
 namespace pvh
 {
 /*---------------------------------------------------------------------------*/
+template <class T>
 class suffix_tree
 {
     public:
+        using char_type = T;
+
+        suffix_tree(const char_type* cptr)
+        {
+        }
     private:
 };
 /*---------------------------------------------------------------------------*/
