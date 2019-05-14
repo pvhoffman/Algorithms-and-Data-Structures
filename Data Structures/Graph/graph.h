@@ -3,45 +3,8 @@
 
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
 
-/*
-
-
-   G(V|E) -> 
-
-
-
-class vertex
-{
-    public:
-        int id;
-};
-
-class edge
-{
-    public:
-        vertex src;
-        vertex dst; 
-        int weight;
-};
-
-class graph
-{
-    public:
-        bool directed;
-        std::map<vertex, std::vector<edge> > vs;
-
-        add_edge(vertex from, vertex to, int weight)
-        {
-            vs[from].push_back(edge(from, to, weight));
-            if(!directed)
-            {
-                vs[to].push_back(edge(to, from, weight));
-            }
-        }
-};
-
-*/
 namespace pvh
 {
 /*---------------------------------------------------------------------------*/
@@ -71,7 +34,7 @@ class vertex
             }
         };
 };
-
+/*---------------------------------------------------------------------------*/
 template <class ID>
 class edge
 {
@@ -87,6 +50,7 @@ class edge
         {
         }
 };
+/*---------------------------------------------------------------------------*/
 template <class ID>
 class adjacency_list_policy
 {
@@ -96,6 +60,14 @@ class adjacency_list_policy
         using edge_type = edge<ident_type>;
         using vertex_hash_type = typename vertex_type::vertex_hash;
         using map_type = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
+
+        class unknown_vertex_exception : public std::runtime_error
+        {
+            public:
+                unknown_vertex_exception(const char* what) : std::runtime_error(what)
+                {
+                }
+        };
 
     protected:
         map_type _edgenodes;
@@ -111,19 +83,29 @@ class adjacency_list_policy
                 _edgenodes[s].emplace_back(edge_type(s, t, w));
             }
         }
-
         const typename map_type::value_type& _get_vertex(ident_type i) const
         {
-            return _edgenodes[i];
+            auto fi = _edgenodes.find(i);
+            if(fi != _edgenodes.end())
+            {
+                return *fi;
+            }
+            throw unknown_vertex_exception("unknown vertex");
         }
         typename map_type::value_type& _get_vertex(ident_type i)
         {
             auto fi = _edgenodes.find(i);
-            return *fi;
-            //return _edgenodes.find(i);
+            if(fi != _edgenodes.end())
+            {
+                return *fi;
+            }
+            throw unknown_vertex_exception("unknown vertex");
         }
-
-
+        typename map_type::size_type _vertex_count() const
+        {
+            return _edgenodes.size();
+        }
+ 
 };
 /*---------------------------------------------------------------------------*/
 template <class ID, template <class> class adjacency_policy>
@@ -137,17 +119,17 @@ class graph : public adjacency_policy<ID>
         using vertex_hash_type = typename vertex_type::vertex_hash;
         using map_type = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
 
-        bool directed;
-
+        graph(bool directed) : _directed(directed)
+        {
+        }
         void add_edge(vertex_type s, vertex_type t, int w = 0)
         {
             adjacency_type::_add_edge(s, t, w);
-            if(!directed)
+            if(!_directed)
             {
                 adjacency_type::_add_edge(t, s, w);
             }
         }
-
         typename map_type::value_type& operator[] (const ident_type a)
         {
             return adjacency_type::_get_vertex(a);
@@ -156,9 +138,12 @@ class graph : public adjacency_policy<ID>
         {
             return adjacency_type::_get_vertex(a);
         }
-
-    private:
-
+        typename map_type::size_type vertex_count() const
+        {
+            return adjacency_type::_vertex_count();
+        }
+     private:
+        bool _directed;
 };
 /*---------------------------------------------------------------------------*/
 }
