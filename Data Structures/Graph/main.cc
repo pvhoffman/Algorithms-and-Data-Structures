@@ -13,55 +13,50 @@
 int
 main(int argc, char** argv)
 {
-    std::cout << "Currently no test cases for graph data structure." << std::endl;
-#if 0
-    using graph_t = pvh::graph<std::string, pvh::adjacency_list_policy>;
+    using graph_t = pvh::graph< pvh::vertex_base, pvh::adjacency_list_policy>;
 
-    graph_t graph(false);
+    graph_t g(false);
+    g.add_edge(graph_t::vertex_type(1), graph_t::vertex_type(2));
+    g.add_edge(graph_t::vertex_type(2), graph_t::vertex_type(3));
+    g.add_edge(graph_t::vertex_type(3), graph_t::vertex_type(4));
+    g.add_edge(graph_t::vertex_type(4), graph_t::vertex_type(5));
+    g.add_edge(graph_t::vertex_type(5), graph_t::vertex_type(1));
+    g.add_edge(graph_t::vertex_type(2), graph_t::vertex_type(5));
+    g.add_edge(graph_t::vertex_type(1), graph_t::vertex_type(6));
 
-    graph.add_edge(graph_t::vertex_type("paul"), graph_t::vertex_type("kendra"));
-    graph.add_edge(graph_t::vertex_type("kendra"), graph_t::vertex_type("quinn"));
-    graph.add_edge(graph_t::vertex_type("kendra"), graph_t::vertex_type("riley"));
-    graph.add_edge(graph_t::vertex_type("riley"), graph_t::vertex_type("allie"));
-    graph.add_edge(graph_t::vertex_type("allie"), graph_t::vertex_type("crystal"));
-    graph.add_edge(graph_t::vertex_type("quinn"), graph_t::vertex_type("judd"));
+    // bfs
+    std::queue<graph_t::ident_type> qu;
+    std::unordered_set<graph_t::ident_type> visited;
+    std::unordered_set<graph_t::ident_type> processed;
 
-    // bfs -- start with paul
-    std::queue<graph_t::vertex_type> qu;
-    std::unordered_set<std::string> visited;
-    std::unordered_map<std::string, std::string> ps;
-
-    qu.push(graph["judd"].first);
-    while(!qu.empty())
+    qu.push(11);
+    try
     {
-        auto v = qu.front();
-        std::cout << "processing vertex: " << v.id << std::endl;
-        qu.pop();
-        visited.insert(v.id);
-        for(const auto& ns : graph[v.id].second)
+        while(!qu.empty())
         {
-            if(visited.find(ns.t.id) == visited.end())
+            auto v = qu.front();
+            qu.pop();
+
+            if(processed.find(v) == processed.end())
             {
-                ps[ns.t.id] = v.id;
-                qu.push(ns.t);
+                std::cout << "processing vertex: " << v << std::endl;
+                visited.insert(v);
+                for(const auto& adj_vs : g[v].second)
+                {
+                    if(visited.find(adj_vs.destination.id) == visited.end())
+                    {
+                        std::cout << "\tfound " << adj_vs.destination.id << std::endl;
+                        qu.push(adj_vs.destination.id);
+                    }
+                }
+                processed.insert(v);
             }
         }
     }
-
-    // follow judd's network of friends up
-    auto pi = ps.find("paul");
-    if(pi != ps.end())
+    catch(graph_t::adjacency_type::unknown_vertex_exception &uvex)
     {
-        std::cout << (*pi).first << " <- ";
-        while(pi != ps.end())
-        {
-            std::cout << (*pi).second << " <- ";
-            auto p = (*pi).second;
-            pi = ps.find(p);
-        }
+        std::cout << "unknown vertex" << std::endl;
     }
-    std::cout << std::endl;
-#endif
-    return 0;
 
+    return 0;
 }

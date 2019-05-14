@@ -8,58 +8,60 @@
 namespace pvh
 {
 /*---------------------------------------------------------------------------*/
-template <class ID>
-class vertex
+class vertex_base
 {
     public:
-        using ident_type = ID;
+        struct vertex_base_hash;
+
+        using ident_type = unsigned int;
+        using hash_type = vertex_base_hash;
 
         ident_type id;
-        vertex(ident_type i) : id(i)
+        vertex_base(ident_type i) : id(i)
         {
         }
-        bool operator == (const vertex& rhs)
+        bool operator == (const vertex_base& rhs)
         {
             return id == rhs.id;
         }
-        friend bool operator == (const vertex& lhs, const vertex& rhs)
+        friend bool operator == (const vertex_base& lhs, const vertex_base& rhs)
         {
             return lhs.id == rhs.id;
         }
-        struct vertex_hash
+        struct vertex_base_hash
         {
-            std::size_t operator()(const vertex& v) const
+            std::size_t operator()(const vertex_base& v) const
             {
                 return std::hash<ident_type>()(v.id);
             }
         };
 };
 /*---------------------------------------------------------------------------*/
-template <class ID>
+template <class V>
 class edge
 {
     public:
-        using ident_type = ID;
-        using vertex_type = vertex<ident_type>;
+        using vertex_type = V;
+        using ident_type  = typename V::ident_type;
 
-        vertex_type s;
-        vertex_type t;
+        vertex_type source;
+        vertex_type destination;
         int weight;
 
-        edge(vertex_type v1, vertex_type v2, int w = 0) : s(std::move(v1)), t(std::move(v2)), weight(w)
+        edge(vertex_type src, vertex_type dst, int w = 0) : source(std::move(src)), destination(std::move(dst)), weight(w)
         {
         }
 };
 /*---------------------------------------------------------------------------*/
-template <class ID>
+template <class V>
 class adjacency_list_policy
 {
     public:
-        using ident_type = ID;
-        using vertex_type = vertex<ident_type>;
-        using edge_type = edge<ident_type>;
-        using vertex_hash_type = typename vertex_type::vertex_hash;
-        using map_type = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
+        using vertex_type      = V;
+        using ident_type       = typename V::ident_type;
+        using edge_type        = edge<vertex_type>;
+        using vertex_hash_type = typename vertex_type::hash_type;
+        using map_type         = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
 
         class unknown_vertex_exception : public std::runtime_error
         {
@@ -72,15 +74,15 @@ class adjacency_list_policy
     protected:
         map_type _edgenodes;
 
-        void _add_edge(vertex_type& s, vertex_type& t, int w = 0)
+        void _add_edge(vertex_type& source, vertex_type& destination, int w = 0)
         {
-            if(_edgenodes.find(s) == _edgenodes.end())
+            if(_edgenodes.find(source) == _edgenodes.end())
             {
-                _edgenodes.insert(std::make_pair(s, std::vector<edge_type>{edge_type(s, t, w)}));
+                _edgenodes.insert(std::make_pair(source, std::vector<edge_type>{edge_type(source, destination, w)}));
             }
             else
             {
-                _edgenodes[s].emplace_back(edge_type(s, t, w));
+                _edgenodes[source].emplace_back(edge_type(source, destination, w));
             }
         }
         const typename map_type::value_type& _get_vertex(ident_type i) const
@@ -108,26 +110,27 @@ class adjacency_list_policy
  
 };
 /*---------------------------------------------------------------------------*/
-template <class ID, template <class> class adjacency_policy>
-class graph : public adjacency_policy<ID>
+template <class V, template <class> class adjacency_policy>
+class graph : public adjacency_policy<V>
 {
     public:
-        using ident_type = ID;
-        using vertex_type = vertex<ident_type>;
-        using edge_type = edge<ident_type>;
-        using adjacency_type = adjacency_policy<ident_type>;
-        using vertex_hash_type = typename vertex_type::vertex_hash;
-        using map_type = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
+        using vertex_type      = V;
+        using ident_type       = typename V::ident_type;
+        using edge_type        = edge<vertex_type>;
+        using vertex_hash_type = typename vertex_type::hash_type;
+        using map_type         = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
+        using adjacency_type   = adjacency_policy<vertex_type>;
 
         graph(bool directed) : _directed(directed)
         {
         }
-        void add_edge(vertex_type s, vertex_type t, int w = 0)
+        void add_edge(vertex_type source, vertex_type destination, int w = 0)
         {
-            adjacency_type::_add_edge(s, t, w);
+            adjacency_type::_add_edge(source, destination, w);
             if(!_directed)
             {
-                adjacency_type::_add_edge(t, s, w);
+                // add a back edge
+                adjacency_type::_add_edge(destination, source, w);
             }
         }
         typename map_type::value_type& operator[] (const ident_type a)
