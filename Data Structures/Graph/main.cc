@@ -10,11 +10,70 @@
 #include <catch2/catch.hpp>
 #include "graph.h"
 
+
+/* the vertex type can be any user defined type, not just a primative
+ *
+ *
+ * */
+
+struct FriendStreetAddress
+{
+    std::string street_number;
+    std::string unit_number;
+    std::string street_name;
+    FriendStreetAddress(std::string street_num, std::string unit_num, std::string name) :
+        street_number(std::move(street_num))
+        , unit_number(std::move(unit_num))
+        , street_name(std::move(name))
+    {
+    }
+    FriendStreetAddress()
+    {
+    }
+};
+
+struct FriendStreetAddressVertex
+{
+
+    struct FriendStreetAddressVertexHash;
+    using ident_type = FriendStreetAddress;
+    using hash_type  = FriendStreetAddressVertexHash;
+
+    ident_type id;
+
+    FriendStreetAddressVertex(ident_type i) : id(i)
+    {
+    }
+
+    bool operator == (const FriendStreetAddressVertex& rhs)
+    {
+        return false;
+    }
+
+    friend bool operator == (const FriendStreetAddress& lhs, const FriendStreetAddress& rhs)
+    {
+        return lhs.street_number == rhs.street_number
+            && lhs.unit_number == rhs.unit_number
+            && lhs.street_name == rhs.street_name;
+    }
+    struct FriendStreetAddressHash
+    {
+        std::size_t operator()(const FriendStreetAddress& f)
+        {
+            return ((std::hash<std::string>()(f.street_number) 
+                    ^ (std::hash<std::string>()(f.unit_number) << 5)
+                    ^ (std::hash<std::string>()(f.street_name) << 13)));
+        }
+    };
+};
+
 int
 main(int argc, char** argv)
 {
     using graph_t = pvh::graph< pvh::vertex_base, pvh::adjacency_list_policy>;
+    using graph1_t = pvh::graph< FriendStreetAddressVertex, pvh::adjacency_list_policy>;
 
+    graph1_t(false);
     graph_t g(false);
     g.add_edge(graph_t::vertex_type(1), graph_t::vertex_type(2));
     g.add_edge(graph_t::vertex_type(2), graph_t::vertex_type(3));
