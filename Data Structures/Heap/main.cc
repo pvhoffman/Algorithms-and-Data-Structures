@@ -20,7 +20,7 @@ static int random_heap_size()
 TEST_CASE("1. Min heap sort order", "[minheap]")
 {
 
-    using IntegerMinHeap = pvh::heap<int, pvh::heap_compare_min>;
+    using IntegerMinHeap = pvh::Heap<int, pvh::HeapCompareMin>;
     IntegerMinHeap minheap;
 
 
@@ -42,7 +42,7 @@ TEST_CASE("1. Min heap sort order", "[minheap]")
 TEST_CASE("2. Max heap sort order", "[maxheap]")
 {
 
-    using IntegerMaxHeap = pvh::heap<int, pvh::heap_compare_max>;
+    using IntegerMaxHeap = pvh::Heap<int, pvh::HeapCompareMax>;
     IntegerMaxHeap maxheap;
 
 
