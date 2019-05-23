@@ -29,7 +29,7 @@ TEST_CASE("1. Friend Network", "[disjoint_set]")
             , std::make_pair(8, 9)
     };
 
-    pvh::disjoint_set<int> ds(10);
+    pvh::DisjointSet<int> ds(10);
     for(auto friends : friend_list)
     {
         ds.union_sets(friends.first, friends.second);
@@ -44,7 +44,7 @@ TEST_CASE("1. Friend Network", "[disjoint_set]")
  * */
 TEST_CASE("2. Network Connections", "[disjoint_set]")
 {
-    pvh::disjoint_set<int> ds(10);
+    pvh::DisjointSet<int> ds(10);
     // connect computers 1 to 5 and 2 to 7.
     ds.union_sets(1, 5);
     ds.union_sets(2, 7);
@@ -94,7 +94,7 @@ given the above as input.
 TEST_CASE("3. Unique Religions", "[disjoint_set]")
 {
     {
-        pvh::disjoint_set<int> ds1(10);
+        pvh::DisjointSet<int> ds1(10);
         ds1.union_sets(1, 2);
         ds1.union_sets(1, 3);
         ds1.union_sets(1, 4);
@@ -108,7 +108,7 @@ TEST_CASE("3. Unique Religions", "[disjoint_set]")
     }
 
     {
-        pvh::disjoint_set<int> ds2(10);
+        pvh::DisjointSet<int> ds2(10);
         ds2.union_sets(2, 3);
         ds2.union_sets(4, 5);
         ds2.union_sets(4, 8);
@@ -116,3 +116,4 @@ TEST_CASE("3. Unique Religions", "[disjoint_set]")
         REQUIRE(ds2.distinct_sets() == 7);
     }
 }
+

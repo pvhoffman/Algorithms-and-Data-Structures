@@ -7,44 +7,41 @@ namespace pvh
 {
 /*---------------------------------------------------------------------------*/
 template <typename T = int>
-class disjoint_set
+class DisjointSet
 {
     public:
         using value_type = T;
         using size_type = typename std::vector<value_type>::size_type;
 
-        struct set_node
+        struct SetNode
         {
-            size_type parent;
-            size_type size;
+            size_type m_parent;
+            size_type m_size;
         };
 
-        disjoint_set(size_type count) : _set_nodes(count + 1), _largest_set(1), _distinct_sets(count)
+        DisjointSet(size_type count) : m_set_nodes(count + 1), m_largest_set(1), m_distinct_sets(count)
         {
             for(size_type i = 1; i <= count; i++)
             {
-                _set_nodes[i].parent = i;
-                _set_nodes[i].size = 1;
+                m_set_nodes[i].m_parent = i;
+                m_set_nodes[i].m_size = 1;
             }
         }
 
         size_type find(size_type x) 
         {
-            if(_set_nodes[x].parent == x)
+            if(m_set_nodes[x].m_parent == x)
             {
                 return x;
             }
-            else
-            {
-                size_type p = find(_set_nodes[x].parent);
-                _set_nodes[x].parent = p;
-                return p;
-            }
+            size_type p = find(m_set_nodes[x].m_parent);
+            m_set_nodes[x].m_parent = p;
+            return p;
         }
 
         size_type largest_set() const
         {
-           return _largest_set;
+           return m_largest_set;
         }
 
         void union_sets(size_type x, size_type y)
@@ -55,21 +52,21 @@ class disjoint_set
             if(l != r)
             {
                 size_type s = 0;
-                if(_set_nodes[l].size >= _set_nodes[r].size)
+                if(m_set_nodes[l].m_size >= m_set_nodes[r].m_size)
                 {
-                    _set_nodes[l].size = s = _set_nodes[l].size + _set_nodes[r].size;
-                    _set_nodes[r].parent = l;
+                    m_set_nodes[l].m_size = s = m_set_nodes[l].m_size + m_set_nodes[r].m_size;
+                    m_set_nodes[r].m_parent = l;
                 }
                 else
                 {
-                    _set_nodes[r].size = s = _set_nodes[r].size + _set_nodes[l].size;
-                    _set_nodes[l].parent = r;
+                    m_set_nodes[r].m_size = s = m_set_nodes[r].m_size + m_set_nodes[l].m_size;
+                    m_set_nodes[l].m_parent = r;
                 }
-                if(s > _largest_set)
+                if(s > m_largest_set)
                 {
-                    _largest_set = s;
+                    m_largest_set = s;
                 }
-                --_distinct_sets;
+                --m_distinct_sets;
             }
         }
 
@@ -80,18 +77,15 @@ class disjoint_set
 
         size_type distinct_sets()
         {
-            return _distinct_sets;
+            return m_distinct_sets;
         }
 
     private:
-        std::vector<set_node> _set_nodes;
-        size_type _largest_set;
-        size_type _distinct_sets;
-        
-
-
+        std::vector<SetNode> m_set_nodes;
+        size_type m_largest_set;
+        size_type m_distinct_sets;
 };
 /*---------------------------------------------------------------------------*/
 }
-
 #endif /*!__DISJOINT_SET_DISJOINT_SET_H__*/
+

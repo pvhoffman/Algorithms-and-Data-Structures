@@ -39,6 +39,9 @@ The intended purpose of this, and any, coding standard is to reduce the cognativ
 2.  Additional words for the identifer of a class, struct, enumerated type, or typedef will begin with an upper case letter.
 3.  All characters in a method or function identifer will be composed of all lower case characters.
 4.  Identifiers for constants and enumerated values will be all lower case characters.
+5.  Variable names will convey meaning with the exception of the i, j, k convention used in loops.
+6.  All characters in variables will be composed of all lower case characters.
+7.  Class and struct member variable names will be prefixed with 'm\_'.
 
 #### Classes
 1.  Classes should be divided by sections public, protected, and private in that order.
