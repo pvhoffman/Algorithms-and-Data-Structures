@@ -70,10 +70,10 @@ struct FriendStreetAddressVertex
 int
 main(int argc, char** argv)
 {
-    using graph_t = pvh::graph< pvh::vertex_base, pvh::adjacency_list_policy>;
-    using graph1_t = pvh::graph< FriendStreetAddressVertex, pvh::adjacency_list_policy>;
+    using graph_t = pvh::Graph< pvh::VertexBase, pvh::AdjacencyListPolicy>;
+    //using graph1_t = pvh::graph< FriendStreetAddressVertex, pvh::adjacency_list_policy>;
 
-    graph1_t(false);
+    //graph1_t(false);
     graph_t g(false);
     g.add_edge(graph_t::vertex_type(1), graph_t::vertex_type(2));
     g.add_edge(graph_t::vertex_type(2), graph_t::vertex_type(3));
@@ -102,17 +102,17 @@ main(int argc, char** argv)
                 visited.insert(v);
                 for(const auto& adj_vs : g[v].second)
                 {
-                    if(visited.find(adj_vs.destination.id) == visited.end())
+                    if(visited.find(adj_vs.m_destination.m_id) == visited.end())
                     {
-                        std::cout << "\tfound " << adj_vs.destination.id << std::endl;
-                        qu.push(adj_vs.destination.id);
+                        std::cout << "\tfound " << adj_vs.m_destination.m_id << std::endl;
+                        qu.push(adj_vs.m_destination.m_id);
                     }
                 }
                 processed.insert(v);
             }
         }
     }
-    catch(graph_t::adjacency_type::unknown_vertex_exception &uvex)
+    catch(graph_t::adjacency_type::UnknownVertexException &uvex)
     {
         std::cout << "unknown vertex" << std::endl;
     }

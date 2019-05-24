@@ -8,145 +8,145 @@
 namespace pvh
 {
 /*---------------------------------------------------------------------------*/
-class vertex_base
+class VertexBase
 {
     public:
-        struct vertex_base_hash;
+        struct VertexBaseHash;
 
         using ident_type = unsigned int;
-        using hash_type = vertex_base_hash;
+        using hash_type = VertexBaseHash;
 
-        ident_type id;
-        vertex_base(ident_type i) : id(i)
+        ident_type m_id;
+        VertexBase(ident_type i) : m_id(i)
         {
         }
-        bool operator == (const vertex_base& rhs)
+        bool operator == (const VertexBase& rhs)
         {
-            return id == rhs.id;
+            return m_id == rhs.m_id;
         }
-        friend bool operator == (const vertex_base& lhs, const vertex_base& rhs)
+        friend bool operator == (const VertexBase& lhs, const VertexBase& rhs)
         {
-            return lhs.id == rhs.id;
+            return lhs.m_id == rhs.m_id;
         }
-        struct vertex_base_hash
+        struct VertexBaseHash
         {
-            std::size_t operator()(const vertex_base& v) const
+            std::size_t operator()(const VertexBase& v) const
             {
-                return std::hash<ident_type>()(v.id);
+                return std::hash<ident_type>()(v.m_id);
             }
         };
 };
 /*---------------------------------------------------------------------------*/
 template <class V>
-class edge
+class GraphEdge
 {
     public:
         using vertex_type = V;
         using ident_type  = typename V::ident_type;
 
-        vertex_type source;
-        vertex_type destination;
-        int weight;
+        vertex_type m_source;
+        vertex_type m_destination;
+        int m_weight;
 
-        edge(vertex_type src, vertex_type dst, int w = 0) : source(std::move(src)), destination(std::move(dst)), weight(w)
+        GraphEdge(vertex_type src, vertex_type dst, int w = 0) : m_source(std::move(src)), m_destination(std::move(dst)), m_weight(w)
         {
         }
 };
 /*---------------------------------------------------------------------------*/
 template <class V>
-class adjacency_list_policy
+class AdjacencyListPolicy 
 {
     public:
         using vertex_type      = V;
         using ident_type       = typename V::ident_type;
-        using edge_type        = edge<vertex_type>;
+        using edge_type        = GraphEdge<vertex_type>;
         using vertex_hash_type = typename vertex_type::hash_type;
         using map_type         = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
 
-        class unknown_vertex_exception : public std::runtime_error
+        class UnknownVertexException : public std::runtime_error
         {
             public:
-                unknown_vertex_exception(const char* what) : std::runtime_error(what)
+                UnknownVertexException(const char* what) : std::runtime_error(what)
                 {
                 }
         };
 
     protected:
-        map_type _edgenodes;
+        map_type m_edgenodes;
 
-        void _add_edge(vertex_type& source, vertex_type& destination, int w = 0)
+        void add_edge(vertex_type& source, vertex_type& destination, int w = 0)
         {
-            if(_edgenodes.find(source) == _edgenodes.end())
+            if(m_edgenodes.find(source) == m_edgenodes.end())
             {
-                _edgenodes.insert(std::make_pair(source, std::vector<edge_type>{edge_type(source, destination, w)}));
+                m_edgenodes.insert(std::make_pair(source, std::vector<edge_type>{edge_type(source, destination, w)}));
             }
             else
             {
-                _edgenodes[source].emplace_back(edge_type(source, destination, w));
+                m_edgenodes[source].emplace_back(edge_type(source, destination, w));
             }
         }
-        const typename map_type::value_type& _get_vertex(ident_type i) const
+        const typename map_type::value_type& get_vertex(ident_type i) const
         {
-            auto fi = _edgenodes.find(i);
-            if(fi != _edgenodes.end())
+            auto fi = m_edgenodes.find(i);
+            if(fi != m_edgenodes.end())
             {
                 return *fi;
             }
-            throw unknown_vertex_exception("unknown vertex");
+            throw UnknownVertexException("unknown vertex");
         }
-        typename map_type::value_type& _get_vertex(ident_type i)
+        typename map_type::value_type& get_vertex(ident_type i)
         {
-            auto fi = _edgenodes.find(i);
-            if(fi != _edgenodes.end())
+            auto fi = m_edgenodes.find(i);
+            if(fi != m_edgenodes.end())
             {
                 return *fi;
             }
-            throw unknown_vertex_exception("unknown vertex");
+            throw UnknownVertexException("unknown vertex");
         }
-        typename map_type::size_type _vertex_count() const
+        typename map_type::size_type vertex_count() const
         {
-            return _edgenodes.size();
+            return m_edgenodes.size();
         }
  
 };
 /*---------------------------------------------------------------------------*/
-template <class V, template <class> class adjacency_policy>
-class graph : public adjacency_policy<V>
+template <class V, template <class> class AdjacencyPolicy>
+class Graph : public AdjacencyPolicy<V>
 {
     public:
         using vertex_type      = V;
         using ident_type       = typename V::ident_type;
-        using edge_type        = edge<vertex_type>;
+        using edge_type        = GraphEdge<vertex_type>;
         using vertex_hash_type = typename vertex_type::hash_type;
         using map_type         = std::unordered_map<vertex_type, std::vector<edge_type>, vertex_hash_type>;
-        using adjacency_type   = adjacency_policy<vertex_type>;
+        using adjacency_type   = AdjacencyPolicy<vertex_type>;
 
-        graph(bool directed) : _directed(directed)
+        Graph(bool directed) : m_directed(directed)
         {
         }
         void add_edge(vertex_type source, vertex_type destination, int w = 0)
         {
-            adjacency_type::_add_edge(source, destination, w);
-            if(!_directed)
+            adjacency_type::add_edge(source, destination, w);
+            if(!m_directed)
             {
                 // add a back edge
-                adjacency_type::_add_edge(destination, source, w);
+                adjacency_type::add_edge(destination, source, w);
             }
         }
         typename map_type::value_type& operator[] (const ident_type a)
         {
-            return adjacency_type::_get_vertex(a);
+            return adjacency_type::get_vertex(a);
         }
         const typename map_type::value_type& operator[] (const ident_type a) const
         {
-            return adjacency_type::_get_vertex(a);
+            return adjacency_type::get_vertex(a);
         }
         typename map_type::size_type vertex_count() const
         {
-            return adjacency_type::_vertex_count();
+            return adjacency_type::vertex_count();
         }
      private:
-        bool _directed;
+        bool m_directed;
 };
 /*---------------------------------------------------------------------------*/
 }
